@@ -1,0 +1,9 @@
+body {
+		
+}
+/* {cursor: none;} */
+#canvas {
+	background-image:url(../imgs/fondo.png);
+	height:800px;
+	width:600px;
+}

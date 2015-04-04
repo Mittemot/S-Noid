@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>S-NOID</title>
+		<link rel="stylesheet" type="text/css" href="css/main.css"/>   
+	</head>
+
+	<body>
+    	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+		<script src="js/funciones.js"></script>
+		<canvas id="canvas" width="600" height="800" onMouseMove="barra.mover(event)"></canvas>
+		<img id="barraimg" src="imgs/barra.png" hidden="1" />
+		<img id="bolaimg" src="imgs/bola.png" hidden="1"  />
+        <img id="lamarilloimg" src="imgs/amarillo.png" hidden="1"  />
+        <img id="lazulimg" src="imgs/azul.png" hidden="1"  />
+        <img id="lrojoimg" src="imgs/rojo.png" hidden="1"  />
+        <img id="lverdeimg" src="imgs/verde.png" hidden="1"  />
+        <audio src="beep.wav" id="beep"  preload="auto"  />
+		
+		<script>			
+			const pi = Math.PI;
+			const este = 0;
+			const norte = 0.5 * pi;
+			const oeste = pi;
+			const sur = 1.5 * pi;					
+			var canvas = document.getElementById('canvas');
+			var ctx = canvas.getContext('2d');
+			var ladrillo = { 
+				img:document.getElementById("lamarilloimg"),
+				x: 0,
+				y: 0,
+				color: "rojo",
+				visi: true,
+				mostrar: function() {
+					ctx.drawImage(this.img,this.x,this.y);
+				},
+				borrar: function() {
+					ctx.clearRect(this.x,this.y,38,16);					
+				},
+				color: function(c) {
+					if (c=="rojo"){
+						this.img = document.getElementById("lrojoimg");
+					}
+					if (c=="azul"){
+						this.img = document.getElementById("lazulimg");
+					}
+					if (c=="verde"){
+						this.img = document.getElementById("lverdeimg");
+					}
+					if (c=="amarillo"){
+						this.img = document.getElementById("lamarilloimg");
+					}			
+				}
+			};			
+			var barra = {
+				img: document.getElementById("barraimg"),
+				x: 250,
+				xdif: 250,
+				mover: function(e) {				
+					ctx.clearRect(0,740,600,25);
+					this.xdif = this.x;
+					this.x = e.clientX - 10;
+					ctx.drawImage(barra.img,this.x - 50,740);
+					//ctx.fill();				
+				}
+			};
+			var bola = {
+				img: document.getElementById("bolaimg"),
+				x: 297,
+				y: 600,
+				ang: Math.random() * 2 * Math.PI ,
+				vel: 3,
+				mover: function() {					
+					ctx.clearRect(this.x - 1,this.y - 1, 10, 10);								
+					this.x = this.x + Math.cos(this.ang) * this.vel;
+					this.y = this.y + Math.sin(this.ang) * this.vel;					
+					ctx.drawImage(this.img,this.x,this.y);
+					//ctx.fill();					
+					if (this.y > 730){
+						PlaySound();
+						this.ang = (2*pi) - this.ang ;
+						if (barra.x < barra.xdif) {
+							if (bola.ang >= sur) {
+								bola.ang +=0.3;
+							}
+							else if (bola.ang < sur) {
+								bola.ang -=0.3;
+								if (bola.ang <= 0) {//evita que la bola se quede horizontal
+								bola.ang = pi/25;	
+								}							
+							}
+						}
+						else if (barra.x > barra.xdif) {
+							if (bola.ang >= sur) {
+								bola.ang -=0.3;
+								if (bola.ang <= 0) {//evita que la bola se quede horizontal
+								bola.ang = pi/25;	
+								}
+							}
+							else if (bola.ang < sur) {
+								bola.ang +=0.3;								
+							}
+						}						
+					}
+					else if (this.x < 1  || this.x>590){
+						PlaySound();
+						this.ang =  pi - this.ang;							
+					}
+					else if (this.y < 1){
+						PlaySound();
+						this.ang = (2*pi) - this.ang;						
+					}										
+					//barra.xdif = barra.x;
+				},				
+			};
+			var muro = {
+				m: [[0,0,0,0,1,2,3,4,3,2,1,0,0,0,0],
+					[0,0,3,3,0,0,0,0,0,0,0,2,2,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,4,4,0,0],
+					[0,0,1,2,0,0,0,0,0,0,0,2,1,0,0],
+					[0,0,0,0,3,3,4,4,1,3,1,0,0,0,0],
+					[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,2,2,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0],
+					[0,0,0,0,3,1,1,1,1,1,1,0,0,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,0,0,1,1,4,1,1,1,1,0,0,0,0],
+					[0,0,0,0,1,1,1,2,1,1,1,0,0,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,1,1,0,0,0,0,0,0,0,1,1,0,0],
+					[0,0,0,0,1,1,1,1,1,1,1,0,0,0,0]
+				],
+				dibujar: function(){
+					for (d=0;d<20;d++){
+						for (c=0;c<15;c++){
+							if (this.m[d][c] != 0){
+								switch (this.m[d][c]) { 
+    								case 1 : 
+									ladrillo.color("rojo");        
+        							break 
+     								case 2 : 
+									ladrillo.color("azul");
+        							break 
+								    case 3 : 
+									ladrillo.color("amarillo");
+							        break 
+									case 4 : 
+									ladrillo.color("verde");
+							        break 
+								}
+								ladrillo.y=80+(d*16);
+								ladrillo.x=c*40;
+								ladrillo.mostrar();
+							}
+						}
+					}
+				},				
+				borrar: function() {
+					ctx.clearRect(0,80,600,600);
+				},
+				colision: function(x,y){
+					var dx = Math.floor((x+3)/40);
+					var dy = Math.floor((y-77)/16);
+					var resp=false;
+										
+					if (this.m[dy][dx] != 0){
+						this.m[dy][dx]=0
+						PlaySound();
+						bola.ang=2*pi - bola.ang;						
+						ladrillo.x=dx*40;
+						ladrillo.y=dy*16+80
+						ladrillo.borrar();						
+						resp =true;
+					}
+					return resp;
+				}
+			};
+			$(function(e) {
+				muro.dibujar();
+				ctx.drawImage(barra.img,250,740);
+				setInterval(dibujar,100);//Como se borran esquinas de cuadros por error, se redibuja el muro aunque no haya colision
+				setInterval(main,10);				
+				function main(){
+					bola.mover();
+					if (muro.colision(bola.x,bola.y)){//solo redibuja el muro si ha habido colision
+						muro.dibujar();
+					}
+				}     
+				function dibujar(){
+					muro.dibujar();					
+				}
+            });				
+		</script>
+    </body>
+</html>
